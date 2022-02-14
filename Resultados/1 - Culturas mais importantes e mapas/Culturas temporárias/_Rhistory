@@ -1,0 +1,512 @@
+for (i in 1:length(lvculttemp)){
+temp=cbind(lvculttemp[[i]]$Municipio,lvculttemp[[i]]$Ano,lvculttemp[[i]]$VPTemporario*ipca$V3)
+colnames(temp)=c("Municipio","Ano","VTReal")
+lvculttemp2[[i]]=temp
+}
+vculttemp=do.call(rbind.data.frame,lvculttemp2)
+#merge tables
+vculttemp=merge(vculttemp,climafinalanosp, by.x=c('Municipio','Ano'),by.y=c('Codigo','Ano'),all.x=T,all.y=F)
+vculttemp=merge(vculttemp,climafinalestsp, by.x=c('Municipio','Ano'),by.y=c('Codigo','Ano'),all.x=T,all.y=F)
+vculttemp=merge(vculttemp,bacias, by.x=c('Municipio'), by.y=c('Municipio'),all.x=T,all.y=T)
+#carrega dados de culturas permanentes
+vcultperm=read.csv("/home/bmiyamoto/Documentos/Pesquisa/Artigo VBPSP/Lavoura permanente/vppermanente.csv",
+header=T,na.strings=c("-","NA"))
+vcultperm=vcultperm[vcultperm$Ano>1994,]
+#######Deflacionando série de dados
+lvcultperm2=list()
+lvcultperm=split(vcultperm, paste(vcultperm$Município))
+for (i in 1:length(lvcultperm)){
+perm=cbind(lvcultperm[[i]]$Município,lvcultperm[[i]]$Ano,lvcultperm[[i]]$VPPermanente*ipca$V3)
+colnames(perm)=c("Municipio","Ano","VPReal")
+lvcultperm2[[i]]=perm
+}
+vcultperm=do.call(rbind.data.frame,lvcultperm2)
+#merge tables
+vcultperm=merge(vcultperm,climafinalanosp, by.x=c('Municipio','Ano'),by.y=c('Codigo','Ano'),all.x=T,all.y=F)
+vcultperm=merge(vcultperm,climafinalestsp, by.x=c('Municipio','Ano'),by.y=c('Codigo','Ano'),all.x=T,all.y=F)
+vcultperm=merge(vcultperm,bacias, by.x=c('Municipio'), by.y=c('Municipio'),all.x=T,all.y=T)
+View(vcultperm)
+names(vcultperm)
+clima=aggregate(vcultperm[,c(5,7,10,15)],by=list(Ano=vculttemp$Ano),mean,na.rm=T)
+clima=aggregate(vcultperm[,c(5,7,10,15)],by=list(Ano=vculttemp$Ano),mean,na.rm=T)
+clima=aggregate(vcultperm[,c(5,7,10,15)],by=list(Ano=vculttemp$Ano),sum,na.rm=T)
+clima=aggregate(vcultperm[,c(5,7,10,15)],by=list(Ano=vculttemp$Ano),sum,na.rm=T)
+clima=aggregate(vcultperm[,c(5,7,10,15)],by=list(Ano=vcultperm$Ano),mean,na.rm=T)
+View(clima)
+climabacia=aggregate(vcultperm[,c(5,7,10,15)],by=list(Bacia=vcultperm$Bacia,
+Ano=vcultperm$Ano),mean,na.rm=T)
+View(climabacia)
+climabacial=split(climabacia,paste(climabacia$Bacia))
+str(climabacial)
+length(climabacial)
+climabacial[[1]]
+plot(climabacial[[1]]$`Temperatura Media` ~ climabacial[[1]]$Ano,data=climabacial[[1]])
+TMED=lm(climabacial[[1]]$`Temperatura Media` ~ climabacial[[1]]$Ano,data=climabacial[[1]])
+abline(TMED)
+plot(climabacial[[1]]$`Temperatura Media(sd)` ~ climabacial[[1]]$Ano,data=climabacial[[1]])
+TMED=lm(climabacial[[1]]$`Temperatura Media(sd)`~ climabacial[[1]]$Ano,data=climabacial[[1]])
+TMEDSD=lm(climabacial[[1]]$`Temperatura Media(sd)`~ climabacial[[1]]$Ano,data=climabacial[[1]])
+abline(TMED)
+plot(climabacial[[1]]$`Temperatura Media` ~ climabacial[[1]]$Ano,data=climabacial[[1]])
+TMED=lm(climabacial[[1]]$`Temperatura Media` ~ climabacial[[1]]$Ano,data=climabacial[[1]])
+abline(TMED)
+plot(climabacial[[1]]$`Temperatura Media(sd)` ~ climabacial[[1]]$Ano,data=climabacial[[1]])
+TMEDSD=lm(climabacial[[1]]$`Temperatura Media(sd)`~ climabacial[[1]]$Ano,data=climabacial[[1]])
+abline(TMEDSD)
+plot(climabacial[[1]]$entre0e1~ climabacial[[1]]$Ano,data=climabacial[[1]])
+1mm=lm(climabacial[[1]]$entre0e1~ climabacial[[1]]$Ano,data=climabacial[[1]])
+poucachuva=lm(climabacial[[1]]$entre0e1~ climabacial[[1]]$Ano,data=climabacial[[1]])
+abline(poucachuva)
+plot(climabacial[[1]]$maisde25mm~ climabacial[[1]]$Ano,data=climabacial[[1]])
+muitachuva=lm(climabacial[[1]]$maisde25mm~ climabacial[[1]]$Ano,data=climabacial[[1]])
+abline(muitachuva)
+muitachuva
+poucachuva
+climabacia$`Temperatura Media`=log(climabacia$`Temperatura Media`)
+climabacia$`Temperatura Media(sd)`=log(climabacia$`Temperatura Media(sd)`)
+climabacia$entre0e1=log(climabacia$entre0e1)
+climabacia$maisde25mm=log(climabacia$maisde25mm)
+View(climabacia)
+climabacial=split(climabacia,paste(climabacia$Bacia))
+plot(climabacial[[1]]$`Temperatura Media` ~ climabacial[[1]]$Ano,data=climabacial[[1]])
+TMED=lm(climabacial[[1]]$`Temperatura Media` ~ climabacial[[1]]$Ano,data=climabacial[[1]])
+abline(TMED)
+plot(climabacial[[1]]$`Temperatura Media(sd)` ~ climabacial[[1]]$Ano,data=climabacial[[1]])
+TMEDSD=lm(climabacial[[1]]$`Temperatura Media(sd)`~ climabacial[[1]]$Ano,data=climabacial[[1]])
+abline(TMEDSD)
+plot(climabacial[[1]]$entre0e1~ climabacial[[1]]$Ano,data=climabacial[[1]])
+poucachuva=lm(climabacial[[1]]$entre0e1~ climabacial[[1]]$Ano,data=climabacial[[1]])
+abline(poucachuva)
+plot(climabacial[[1]]$maisde25mm~ climabacial[[1]]$Ano,data=climabacial[[1]])
+muitachuva=lm(climabacial[[1]]$maisde25mm~ climabacial[[1]]$Ano,data=climabacial[[1]])
+abline(muitachuva)
+muitachuva
+poucachuva
+TMED$coefficients
+TMED$coefficients[1]
+TMED$coefficients[2]
+climabacia2=cbind(TMED$coefficients[2],TMEDSD$coefficients[2],poucachuva$coefficients[2],muitachuva$coefficients[2])
+View(climabacia2)
+climabacial[[1]]
+climabacial[[1]]$Bacia[1]
+climabacia2=cbind(climabacial[[1]]$Bacia[1],TMED$coefficients[2],TMEDSD$coefficients[2],poucachuva$coefficients[2],muitachuva$coefficients[2])
+View(climabacia2)
+climabacial[[1]]$Bacia[1,1]
+climabacial[[1]]$Bacia
+climabacial[[1]]$Bacia[2]
+as.character(climabacial[[1]]$Bacia[2])
+climabacia2=cbind(as.character(climabacial[[1]]$Bacia[1]),TMED$coefficients[2],TMEDSD$coefficients[2],poucachuva$coefficients[2],muitachuva$coefficients[2])
+View(climabacia2)
+colnames(climabacia2)=c("Bacia","Temp","Tempsd","menos1mm","mais25mm")
+climabacia2=as.data.frame(cbind(as.character(climabacial[[1]]$Bacia[1]),TMED$coefficients[2],TMEDSD$coefficients[2],poucachuva$coefficients[2],muitachuva$coefficients[2]))
+colnames(climabacia2)=c("Bacia","Temp","Tempsd","menos1mm","mais25mm")
+View(climabacia2)
+climabacia2$Temp=(exp(climabacia2$Temp))-1
+climabacia2$Temp
+climabacia2=as.data.frame(cbind(as.character(climabacial[[1]]$Bacia[1]),as.numeric(TMED$coefficients[2]),
+as.numeric(TMEDSD$coefficients[2]),as.numeric(poucachuva$coefficients[2]),
+as.numeric(muitachuva$coefficients[2])))
+colnames(climabacia2)=c("Bacia","Temp","Tempsd","menos1mm","mais25mm")
+climabacia2$Temp=(exp(climabacia2$Temp))-1
+climabacia2$Temp=exp(climabacia2$Temp)-1
+climabacia2$Temp
+exp(-0.001136181725197)
+exp(-0.001136181725197)
+plot(climabacial[[1]]$`Temperatura Media` ~ climabacial[[1]]$Ano,data=climabacial[[1]])
+climabacia$`Temperatura Media`=log(climabacia$`Temperatura Media`)
+climabacia$`Temperatura Media(sd)`=log(climabacia$`Temperatura Media(sd)`)
+climabacia$entre0e1=log(climabacia$entre0e1)
+climabacia$maisde25mm=log(climabacia$maisde25mm)
+plot(climabacial[[1]]$`Temperatura Media` ~ climabacial[[1]]$Ano,data=climabacial[[1]])
+View(climabacia)
+climabacial=split(climabacia,paste(climabacia$Bacia))
+TMED=lm(climabacial[[1]]$`Temperatura Media` ~ climabacial[[1]]$Ano,data=climabacial[[1]])
+TMEDSD=lm(climabacial[[1]]$`Temperatura Media(sd)`~ climabacial[[1]]$Ano,data=climabacial[[1]])
+poucachuva=lm(climabacial[[1]]$entre0e1~ climabacial[[1]]$Ano,data=climabacial[[1]])
+muitachuva=lm(climabacial[[1]]$maisde25mm~ climabacial[[1]]$Ano,data=climabacial[[1]])
+climabacia2=as.data.frame(cbind(as.character(climabacial[[1]]$Bacia[1]),as.numeric(TMED$coefficients[2]),
+as.numeric(TMEDSD$coefficients[2]),as.numeric(poucachuva$coefficients[2]),
+as.numeric(muitachuva$coefficients[2])))
+colnames(climabacia2)=c("Bacia","Temp","Tempsd","menos1mm","mais25mm")
+View(climabacia2)
+climabacia=aggregate(vcultperm[,c(5,7,10,15)],by=list(Bacia=vcultperm$Bacia,
+Ano=vcultperm$Ano),mean,na.rm=T)
+climabacial=split(climabacia,paste(climabacia$Bacia))
+TMED=lm(climabacial[[1]]$`Temperatura Media` ~ climabacial[[1]]$Ano,data=climabacial[[1]])
+TMEDSD=lm(climabacial[[1]]$`Temperatura Media(sd)`~ climabacial[[1]]$Ano,data=climabacial[[1]])
+poucachuva=lm(climabacial[[1]]$entre0e1~ climabacial[[1]]$Ano,data=climabacial[[1]])
+muitachuva=lm(climabacial[[1]]$maisde25mm~ climabacial[[1]]$Ano,data=climabacial[[1]])
+climabacia2=as.data.frame(cbind(as.character(climabacial[[1]]$Bacia[1]),as.numeric(TMED$coefficients[2]),
+as.numeric(TMEDSD$coefficients[2]),as.numeric(poucachuva$coefficients[2]),
+as.numeric(muitachuva$coefficients[2])))
+colnames(climabacia2)=c("Bacia","Temp","Tempsd","menos1mm","mais25mm")
+View(climabacia2)
+plot(climabacial[[1]]$`Temperatura Media` ~ climabacial[[1]]$Ano,data=climabacial[[1]])
+abline((TMED))
+climabacia=aggregate(vcultperm[,c(5,7,10,15)],by=list(Bacia=vcultperm$Bacia,
+Ano=vcultperm$Ano),mean,na.rm=T)
+climabacia$`Temperatura Media`=log(climabacia$`Temperatura Media`)
+climabacia$`Temperatura Media(sd)`=log(climabacia$`Temperatura Media(sd)`)
+climabacia$entre0e1=log(climabacia$entre0e1)
+climabacia$maisde25mm=log(climabacia$maisde25mm)
+View(climabacia)
+climabacial=split(climabacia,paste(climabacia$Bacia))
+TMED=lm(climabacial[[1]]$`Temperatura Media` ~ climabacial[[1]]$Ano,data=climabacial[[1]])
+TMEDSD=lm(climabacial[[1]]$`Temperatura Media(sd)`~ climabacial[[1]]$Ano,data=climabacial[[1]])
+poucachuva=lm(climabacial[[1]]$entre0e1~ climabacial[[1]]$Ano,data=climabacial[[1]])
+muitachuva=lm(climabacial[[1]]$maisde25mm~ climabacial[[1]]$Ano,data=climabacial[[1]])
+as.numeric(TMED$coefficients[2]
+as.numeric(TMED$coefficients[2]
+as.numeric(TMED$coefficients[2])
+exp(as.numeric(TMED$coefficients[2])
+exp(as.numeric(TMED$coefficients[2]))
+exp(as.numeric(TMED$coefficients[2]))-1
+(exp(as.numeric(TMED$coefficients[2]))-1))*100
+(exp(as.numeric(TMED$coefficients[2]))-1)*100
+exp(2,3)
+exp(2.3)
+exp(as.numeric(TMED$coefficients[2]))-1
+climabacia2=as.data.frame(cbind(as.character(climabacial[[1]]$Bacia[1]),exp(as.numeric(TMED$coefficients[2])),
+exp(as.numeric(TMEDSD$coefficients[2])),exp(as.numeric(poucachuva$coefficients[2])),
+exp(as.numeric(muitachuva$coefficients[2]))))
+View(climabacia2)
+climabacia=aggregate(vcultperm[,c(5,7,10,15)],by=list(Bacia=vcultperm$Bacia,
+Ano=vcultperm$Ano),mean,na.rm=T)
+climabacia$`Temperatura Media`=log(climabacia$`Temperatura Media`)
+climabacia$`Temperatura Media(sd)`=log(climabacia$`Temperatura Media(sd)`)
+climabacia$entre0e1=log(climabacia$entre0e1)
+climabacia$maisde25mm=log(climabacia$maisde25mm)
+climabacial=split(climabacia,paste(climabacia$Bacia))
+TMED=lm(climabacial[[1]]$`Temperatura Media` ~ climabacial[[1]]$Ano,data=climabacial[[1]])
+TMEDSD=lm(climabacial[[1]]$`Temperatura Media(sd)`~ climabacial[[1]]$Ano,data=climabacial[[1]])
+poucachuva=lm(climabacial[[1]]$entre0e1~ climabacial[[1]]$Ano,data=climabacial[[1]])
+muitachuva=lm(climabacial[[1]]$maisde25mm~ climabacial[[1]]$Ano,data=climabacial[[1]])
+climabacia2=as.data.frame(cbind(as.character(climabacial[[1]]$Bacia[1]),(exp(as.numeric(TMED$coefficients[2]))-1),
+(exp(as.numeric(TMEDSD$coefficients[2]))-1),(exp(as.numeric(poucachuva$coefficients[2]))-1),
+(exp(as.numeric(muitachuva$coefficients[2]))-1)))
+View(climabacia2)
+format(-3.73077999485938e-05,scientific=F)
+poucachuva$coefficients[2]
+as.numeric(poucachuva$coefficients[2])
+exp( as.numeric(poucachuva$coefficients[2]))
+exp( as.numeric(poucachuva$coefficients[2]))-1
+View(climabacia2)
+0.9928216-1
+#Exportar a tabela clima e fazer no excel o gráfico de tendência das variáveis climáticas
+clima=aggregate(vcultperm[,c(5,7,10,15)],by=list(Ano=vcultperm$Ano),mean,na.rm=T)
+#Agora preciso obter a taxa de crescimento linear das variáveis por bacia
+#Para isso preciso obter primeiro a série das variáveis por bacia
+climabacia=aggregate(vcultperm[,c(5,7,10,15)],by=list(Bacia=vcultperm$Bacia,
+Ano=vcultperm$Ano),mean,na.rm=T)
+climabacia$`Temperatura Media`=log(climabacia$`Temperatura Media`)
+climabacia$`Temperatura Media(sd)`=log(climabacia$`Temperatura Media(sd)`)
+climabacia$entre0e1=log(climabacia$entre0e1)
+climabacia$maisde25mm=log(climabacia$maisde25mm)
+climabacial=split(climabacia,paste(climabacia$Bacia))
+TMED=lm(climabacial[[1]]$`Temperatura Media` ~ climabacial[[1]]$Ano,data=climabacial[[1]])
+TMEDSD=lm(climabacial[[1]]$`Temperatura Media(sd)`~ climabacial[[1]]$Ano,data=climabacial[[1]])
+poucachuva=lm(climabacial[[1]]$entre0e1~ climabacial[[1]]$Ano,data=climabacial[[1]])
+muitachuva=lm(climabacial[[1]]$maisde25mm~ climabacial[[1]]$Ano,data=climabacial[[1]])
+#Falta só multipliplicar por 100 para as taxas de crescimento ficarem em percentual
+climabacia2=as.data.frame(cbind(as.character(climabacial[[1]]$Bacia[1]),(exp(as.numeric(TMED$coefficients[2]))-1),
+(exp(as.numeric(TMEDSD$coefficients[2]))-1),(exp(as.numeric(poucachuva$coefficients[2]))-1),
+(exp(as.numeric(muitachuva$coefficients[2]))-1)))
+colnames(climabacia2)=c("Bacia","Temp","Tempsd","menos1mm","mais25mm")
+View(climabacia2)
+climabacial2=list()
+clima=aggregate(vcultperm[,c(5,7,10,15)],by=list(Ano=vcultperm$Ano),mean,na.rm=T)
+#Agora preciso obter a taxa de crescimento linear das variáveis por bacia
+#Para isso preciso obter primeiro a série das variáveis por bacia
+climabacia=aggregate(vcultperm[,c(5,7,10,15)],by=list(Bacia=vcultperm$Bacia,
+Ano=vcultperm$Ano),mean,na.rm=T)
+climabacia$`Temperatura Media`=log(climabacia$`Temperatura Media`)
+climabacia$`Temperatura Media(sd)`=log(climabacia$`Temperatura Media(sd)`)
+climabacia$entre0e1=log(climabacia$entre0e1)
+climabacia$maisde25mm=log(climabacia$maisde25mm)
+climabacial2=list()
+climabacial=split(climabacia,paste(climabacia$Bacia))
+for(i in 1: length(climabacial)){
+TMED=lm(climabacial[[i]]$`Temperatura Media` ~ climabacial[[i]]$Ano,data=climabacial[[i]])
+TMEDSD=lm(climabacial[[i]]$`Temperatura Media(sd)`~ climabacial[[i]]$Ano,data=climabacial[[i]])
+poucachuva=lm(climabacial[[i]]$entre0e1~ climabacial[[i]]$Ano,data=climabacial[[i]])
+muitachuva=lm(climabacial[[i]]$maisde25mm~ climabacial[[i]]$Ano,data=climabacial[[i]])
+#Falta só multipliplicar por 100 para as taxas de crescimento ficarem em percentual
+climabacia2=as.data.frame(cbind(as.character(climabacial[[i]]$Bacia[1]),(exp(as.numeric(TMED$coefficients[2]))-1),
+(exp(as.numeric(TMEDSD$coefficients[2]))-1),(exp(as.numeric(poucachuva$coefficients[2]))-1),
+(exp(as.numeric(muitachuva$coefficients[2]))-1)))
+colnames(climabacia2)=c("Bacia","Temp","Tempsd","menos1mm","mais25mm")
+climabacial2[[i]]=climabacial2
+}
+climabacia=do.call(rbind.data.frame,climabacial2)
+climabacia=do.call(rbind.data.frame,climabacial2)
+#Agora preciso obter a taxa de crescimento linear das variáveis por bacia
+#Para isso preciso obter primeiro a série das variáveis por bacia
+climabacia=aggregate(vcultperm[,c(5,7,10,15)],by=list(Bacia=vcultperm$Bacia,
+Ano=vcultperm$Ano),mean,na.rm=T)
+climabacia$`Temperatura Media`=log(climabacia$`Temperatura Media`)
+climabacia$`Temperatura Media(sd)`=log(climabacia$`Temperatura Media(sd)`)
+climabacia$entre0e1=log(climabacia$entre0e1)
+climabacia$maisde25mm=log(climabacia$maisde25mm)
+climabacial2=list()
+climabacial=split(climabacia,paste(climabacia$Bacia))
+for(i in 1: length(climabacial)){
+TMED=lm(climabacial[[i]]$`Temperatura Media` ~ climabacial[[i]]$Ano,data=climabacial[[i]])
+TMEDSD=lm(climabacial[[i]]$`Temperatura Media(sd)`~ climabacial[[i]]$Ano,data=climabacial[[i]])
+poucachuva=lm(climabacial[[i]]$entre0e1~ climabacial[[i]]$Ano,data=climabacial[[i]])
+muitachuva=lm(climabacial[[i]]$maisde25mm~ climabacial[[i]]$Ano,data=climabacial[[i]])
+#Falta só multipliplicar por 100 para as taxas de crescimento ficarem em percentual
+climabacia2=as.data.frame(cbind(as.character(climabacial[[i]]$Bacia[1]),(exp(as.numeric(TMED$coefficients[2]))-1),
+(exp(as.numeric(TMEDSD$coefficients[2]))-1),(exp(as.numeric(poucachuva$coefficients[2]))-1),
+(exp(as.numeric(muitachuva$coefficients[2]))-1)))
+colnames(climabacia2)=c("Bacia","Temp","Tempsd","menos1mm","mais25mm")
+climabacial2[[i]]=climabacia2
+}
+climabacia=do.call(rbind.data.frame,climabacial2)
+View(climabacia)
+View(climabacia)
+View(climabacia)
+#Exportar a tabela clima e fazer no excel o gráfico de tendência das variáveis climáticas
+clima=aggregate(vcultperm[,c(5,7,10,15)],by=list(Ano=vcultperm$Ano),mean,na.rm=T)
+#Agora preciso obter a taxa de crescimento linear das variáveis por bacia
+#Para isso preciso obter primeiro a série das variáveis por bacia
+climabacia=aggregate(vcultperm[,c(5,7,10,15)],by=list(Bacia=vcultperm$Bacia,
+Ano=vcultperm$Ano),mean,na.rm=T)
+climabacial2=list()
+climabacial=split(climabacia,paste(climabacia$Bacia))
+for(i in 1: length(climabacial)){
+TMED=lm(climabacial[[i]]$`Temperatura Media` ~ climabacial[[i]]$Ano,data=climabacial[[i]])
+TMEDSD=lm(climabacial[[i]]$`Temperatura Media(sd)`~ climabacial[[i]]$Ano,data=climabacial[[i]])
+poucachuva=lm(climabacial[[i]]$entre0e1~ climabacial[[i]]$Ano,data=climabacial[[i]])
+muitachuva=lm(climabacial[[i]]$maisde25mm~ climabacial[[i]]$Ano,data=climabacial[[i]])
+#Falta só multipliplicar por 100 para as taxas de crescimento ficarem em percentual
+climabacia2=as.data.frame(cbind(as.character(climabacial[[i]]$Bacia[1]),(exp(as.numeric(TMED$coefficients[2]))-1),
+(exp(as.numeric(TMEDSD$coefficients[2]))-1),(exp(as.numeric(poucachuva$coefficients[2]))-1),
+(exp(as.numeric(muitachuva$coefficients[2]))-1)))
+colnames(climabacia2)=c("Bacia","Temp","Tempsd","menos1mm","mais25mm")
+climabacial2[[i]]=climabacia2
+}
+#Exportar essa tabela e editá-la em excel
+climabacia=do.call(rbind.data.frame,climabacial2)
+View(climabacia)
+clima=aggregate(vcultperm[,c(5,7,10,15)],by=list(Ano=vcultperm$Ano),mean,na.rm=T)
+#Agora preciso obter a taxa de crescimento linear das variáveis por bacia
+#Para isso preciso obter primeiro a série das variáveis por bacia
+climabacia=aggregate(vcultperm[,c(5,7,10,15)],by=list(Bacia=vcultperm$Bacia,
+Ano=vcultperm$Ano),mean,na.rm=T)
+climabacial2=list()
+climabacial=split(climabacia,paste(climabacia$Bacia))
+for(i in 1: length(climabacial)){
+TMED=lm(climabacial[[i]]$`Temperatura Media` ~ climabacial[[i]]$Ano,data=climabacial[[i]])
+TMEDSD=lm(climabacial[[i]]$`Temperatura Media(sd)`~ climabacial[[i]]$Ano,data=climabacial[[i]])
+poucachuva=lm(climabacial[[i]]$entre0e1~ climabacial[[i]]$Ano,data=climabacial[[i]])
+muitachuva=lm(climabacial[[i]]$maisde25mm~ climabacial[[i]]$Ano,data=climabacial[[i]])
+climabacia2=as.data.frame(cbind(as.character(climabacial[[i]]$Bacia[1]),((as.numeric(TMED$coefficients[2]))-1),
+((as.numeric(TMEDSD$coefficients[2]))-1),((as.numeric(poucachuva$coefficients[2]))-1),
+((as.numeric(muitachuva$coefficients[2]))-1)))
+#Falta só multipliplicar por 100 para as taxas de crescimento ficarem em percentual
+#climabacia2=as.data.frame(cbind(as.character(climabacial[[i]]$Bacia[1]),(exp(as.numeric(TMED$coefficients[2]))-1),
+#             (exp(as.numeric(TMEDSD$coefficients[2]))-1),(exp(as.numeric(poucachuva$coefficients[2]))-1),
+#              (exp(as.numeric(muitachuva$coefficients[2]))-1)))
+#colnames(climabacia2)=c("Bacia","Temp","Tempsd","menos1mm","mais25mm")
+climabacial2[[i]]=climabacia2
+}
+#Exportar essa tabela e editá-la em excel
+climabacia=do.call(rbind.data.frame,climabacial2)
+View(climabacia)
+#Exportar a tabela clima e fazer no excel o gráfico de tendência das variáveis climáticas
+clima=aggregate(vcultperm[,c(5,7,10,15)],by=list(Ano=vcultperm$Ano),mean,na.rm=T)
+#Agora preciso obter a taxa de crescimento linear das variáveis por bacia
+#Para isso preciso obter primeiro a série das variáveis por bacia
+climabacia=aggregate(vcultperm[,c(5,7,10,15)],by=list(Bacia=vcultperm$Bacia,
+Ano=vcultperm$Ano),mean,na.rm=T)
+climabacial2=list()
+climabacial=split(climabacia,paste(climabacia$Bacia))
+for(i in 1: length(climabacial)){
+TMED=lm(climabacial[[i]]$`Temperatura Media` ~ climabacial[[i]]$Ano,data=climabacial[[i]])
+TMEDSD=lm(climabacial[[i]]$`Temperatura Media(sd)`~ climabacial[[i]]$Ano,data=climabacial[[i]])
+poucachuva=lm(climabacial[[i]]$entre0e1~ climabacial[[i]]$Ano,data=climabacial[[i]])
+muitachuva=lm(climabacial[[i]]$maisde25mm~ climabacial[[i]]$Ano,data=climabacial[[i]])
+climabacia2=as.data.frame(cbind(as.character(climabacial[[i]]$Bacia[1]),as.numeric(TMED$coefficients[2]),
+as.numeric(TMEDSD$coefficients[2]),as.numeric(poucachuva$coefficients[2]),
+as.numeric(muitachuva$coefficients[2])))
+#Falta só multipliplicar por 100 para as taxas de crescimento ficarem em percentual
+#climabacia2=as.data.frame(cbind(as.character(climabacial[[i]]$Bacia[1]),(exp(as.numeric(TMED$coefficients[2]))-1),
+#             (exp(as.numeric(TMEDSD$coefficients[2]))-1),(exp(as.numeric(poucachuva$coefficients[2]))-1),
+#              (exp(as.numeric(muitachuva$coefficients[2]))-1)))
+#colnames(climabacia2)=c("Bacia","Temp","Tempsd","menos1mm","mais25mm")
+climabacial2[[i]]=climabacia2
+}
+#Exportar essa tabela e editá-la em excel
+climabacia=do.call(rbind.data.frame,climabacial2)
+View(climabacia)
+View(climabacia)
+#Agora preciso obter a taxa de crescimento linear das variáveis por bacia
+#Para isso preciso obter primeiro a série das variáveis por bacia
+climabacia=aggregate(vcultperm[,c(5,7,10,15)],by=list(Bacia=vcultperm$Bacia,
+Ano=vcultperm$Ano),mean,na.rm=T)
+climabacia$`Temperatura Media`=log(climabacia$`Temperatura Media`)
+climabacia$`Temperatura Media(sd)`=log(climabacia$`Temperatura Media(sd)`)
+climabacia$entre0e1=log(climabacia$entre0e1)
+climabacia$maisde25mm=log(climabacia$maisde25mm)
+climabacial2=list()
+climabacial=split(climabacia,paste(climabacia$Bacia))
+for(i in 1: length(climabacial)){
+TMED=lm(climabacial[[i]]$`Temperatura Media` ~ climabacial[[i]]$Ano,data=climabacial[[i]])
+TMEDSD=lm(climabacial[[i]]$`Temperatura Media(sd)`~ climabacial[[i]]$Ano,data=climabacial[[i]])
+poucachuva=lm(climabacial[[i]]$entre0e1~ climabacial[[i]]$Ano,data=climabacial[[i]])
+muitachuva=lm(climabacial[[i]]$maisde25mm~ climabacial[[i]]$Ano,data=climabacial[[i]])
+#Falta só multipliplicar por 100 para as taxas de crescimento ficarem em percentual
+climabacia2=as.data.frame(cbind(as.character(climabacial[[i]]$Bacia[1]),(exp(as.numeric(TMED$coefficients[2]))-1),
+(exp(as.numeric(TMEDSD$coefficients[2]))-1),(exp(as.numeric(poucachuva$coefficients[2]))-1),
+(exp(as.numeric(muitachuva$coefficients[2]))-1)))
+colnames(climabacia2)=c("Bacia","Temp","Tempsd","menos1mm","mais25mm")
+climabacial2[[i]]=climabacia2
+}
+#Exportar essa tabela e editá-la em excel
+climabacia=do.call(rbind.data.frame,climabacial2)
+View(climabacia)
+View(climabacia)
+View(clima)
+names(vculttemp)
+vt=aggregate(vculttemp[,c(3)],by=list(Ano=vculttemp$Ano),sum.na.rm=T)
+vt=aggregate(vculttemp[,c(3)],by=list(Ano=vculttemp$Ano),sum,na.rm=T)
+View(vt)
+plot(vt$x,vt$Ano)
+plot(vt$x,vt$Ano,data=vt)
+names(vculttemp)
+vculttemp[,c(3)]
+names(vculttemp)
+View(vculttemp)
+View(vt)
+names(vcultperm)
+vp=aggregate(vcultperm[,c(3)],by=list(Ano=vcultperm$Ano),sum,na.rm=T)
+View(vp)
+View(vt)
+33/251
+View(vp)
+View(vt)
+vproducao=cbind(vt,vp[,c(2)])
+View(vproducao)
+colnames(vproducao)=c("Ano","VTemporarias","VPermanente")
+View(vproducao)
+names(vcultperm)
+vprodbaciap=aggregate(vcultperm[,c(3)],by=list(Bacia=vcultperm$Bacia,Ano=vcultperm),sum,na.rm=T)
+vprodbaciap=aggregate(vcultperm[,c(3)],by=list(Bacia=vcultperm$Bacia,Ano=vcultperm$Ano),sum,na.rm=T)
+View(vprodbaciap)
+names(vculttemp)
+vprodbaciat=aggregate(vculttemp[,c(3)],by=list(Bacia=vculttemp$Bacia,Ano=vculttemp$Ano),sum,na.rm=T)
+View(vprodbaciat)
+vprodbacia=merge(vprodbaciap,vprodbaciat,by.x=("Bacia","Ano"))
+vprodbacia=merge(vprodbaciap,vprodbaciat,by.x=c("Bacia","Ano"),by.y=c("Bacia","Ano"))
+View(vprodbacia)
+names(vprodbacia)
+colnames(vprodbacia)=c("Bacia","Ano","Vperm","Vtemp")
+View(vprodbacia)
+View(vprodbaciap)
+View(vprodbacia)
+View(vprodbaciat)
+View(vprodbacia)
+vprodbacial=split(vprodbacia,paste(vprodbacia$Bacia))
+length(vprodbacial)
+vprodbacial[[1]]
+vprodbacial[[2]]
+vprodbacial[[3]]
+vprodbacial2=list()
+vprop=lm(vprodbacial[[1]]$Vperm ~ vprodbacial[[1]]$Ano,data=vprodbacial[[1]])
+vprot=lm(vprodbacial[[1]]$Vtemp ~ vprodbacial[[1]]$Ano,data=vprodbacial[[1]])
+vprodbaciap=aggregate(vcultperm[,c(3)],by=list(Bacia=vcultperm$Bacia,Ano=vcultperm$Ano),sum,na.rm=T)
+vprodbaciat=aggregate(vculttemp[,c(3)],by=list(Bacia=vculttemp$Bacia,Ano=vculttemp$Ano),sum,na.rm=T)
+vprodbaciap$x=log(vprodbaciap$x)
+View(vprodbaciap)
+View(vprodbaciap)
+View(vprodbaciat)
+vprodbaciat$x=log(vprodbaciat$x)
+View(vprodbaciat)
+vprodbacia=merge(vprodbaciap,vprodbaciat,by.x=c("Bacia","Ano"),by.y=c("Bacia","Ano"))
+View(vprodbacia)
+colnames(vprodbacia)=c("Bacia","Ano","Vperm","Vtemp")
+View(vprodbacia)
+vprodbacial2=list()
+vprodbacial=split(vprodbacia,paste(vprodbacia$Bacia))
+vprop=lm(vprodbacial[[1]]$Vperm ~ vprodbacial[[1]]$Ano,data=vprodbacial[[1]])
+vprot=lm(vprodbacial[[1]]$Vtemp ~ vprodbacial[[1]]$Ano,data=vprodbacial[[1]])
+vpro=as.data.frame(cbind(vprodbacial[[1]]$Bacia,vprodbacial[[1]],(exp(as.numeric(vprop$coefficients[2]))-1),
+(exp(as.numeric(vprot$coefficients[2]))-1)))
+View(vpro)
+vpro=as.data.frame(cbind(vprodbacial[[1]]$Bacia[1],vprodbacial[[1]],(exp(as.numeric(vprop$coefficients[2]))-1),
+(exp(as.numeric(vprot$coefficients[2]))-1)))
+View(vpro)
+vprodbacial[[1]]$Bacia[1]
+vpro=as.data.frame(cbind(vprodbacial[[1]]$Bacia[1],(exp(as.numeric(vprop$coefficients[2]))-1),
+(exp(as.numeric(vprot$coefficients[2]))-1)))
+View(vpro)
+vpro=as.data.frame(cbind(as.character(vprodbacial[[1]]$Bacia[1]),(exp(as.numeric(vprop$coefficients[2]))-1),
+(exp(as.numeric(vprot$coefficients[2]))-1)))
+View(vpro)
+colnames(vpro)=c("Bacia","Vperm","Vtemp")
+View(vpro)
+###Valor da produção por bacia
+vprodbaciap=aggregate(vcultperm[,c(3)],by=list(Bacia=vcultperm$Bacia,Ano=vcultperm$Ano),sum,na.rm=T)
+vprodbaciap$x=log(vprodbaciap$x)
+vprodbaciat=aggregate(vculttemp[,c(3)],by=list(Bacia=vculttemp$Bacia,Ano=vculttemp$Ano),sum,na.rm=T)
+vprodbaciat$x=log(vprodbaciat$x)
+vprodbacia=merge(vprodbaciap,vprodbaciat,by.x=c("Bacia","Ano"),by.y=c("Bacia","Ano"))
+colnames(vprodbacia)=c("Bacia","Ano","Vperm","Vtemp")
+vprodbacial2=list()
+vprodbacial=split(vprodbacia,paste(vprodbacia$Bacia))
+for(i in 1:length(vprodbacial)){
+vprop=lm(vprodbacial[[i]]$Vperm ~ vprodbacial[[i]]$Ano,data=vprodbacial[[i]])
+vprot=lm(vprodbacial[[i]]$Vtemp ~ vprodbacial[[i]]$Ano,data=vprodbacial[[i]])
+vpro=as.data.frame(cbind(as.character(vprodbacial[[i]]$Bacia[1]),(exp(as.numeric(vprop$coefficients[2]))-1),
+(exp(as.numeric(vprot$coefficients[2]))-1)))
+colnames(vpro)=c("Bacia","Vperm","Vtemp")
+vprodbacial2[[i]]=vpro
+}
+vprodbacia=do.call(rbind.data.frame,vprodbacial2)
+i=1
+vprop=lm(vprodbacial[[i]]$Vperm ~ vprodbacial[[i]]$Ano,data=vprodbacial[[i]])
+vprot=lm(vprodbacial[[i]]$Vtemp ~ vprodbacial[[i]]$Ano,data=vprodbacial[[i]])
+vpro=as.data.frame(cbind(as.character(vprodbacial[[i]]$Bacia[1]),(exp(as.numeric(vprop$coefficients[2]))-1),
+(exp(as.numeric(vprot$coefficients[2]))-1)))
+colnames(vpro)=c("Bacia","Vperm","Vtemp")
+length(vprodbacial)
+vprodbaciap=aggregate(vcultperm[,c(3)],by=list(Bacia=vcultperm$Bacia,Ano=vcultperm$Ano),sum,na.rm=T)
+vprodbaciap$x=log(vprodbaciap$x)
+vprodbaciat=aggregate(vculttemp[,c(3)],by=list(Bacia=vculttemp$Bacia,Ano=vculttemp$Ano),sum,na.rm=T)
+vprodbaciat$x=log(vprodbaciat$x)
+vprodbacia=merge(vprodbaciap,vprodbaciat,by.x=c("Bacia","Ano"),by.y=c("Bacia","Ano"))
+colnames(vprodbacia)=c("Bacia","Ano","Vperm","Vtemp")
+vprodbacial2=list()
+vprodbacial=split(vprodbacia,paste(vprodbacia$Bacia))
+for(i in 1:length(vprodbacial)){
+vprop=lm(vprodbacial[[i]]$Vperm ~ vprodbacial[[i]]$Ano,data=vprodbacial[[i]])
+vprot=lm(vprodbacial[[i]]$Vtemp ~ vprodbacial[[i]]$Ano,data=vprodbacial[[i]])
+vpro=as.data.frame(cbind(as.character(vprodbacial[[i]]$Bacia[1]),(exp(as.numeric(vprop$coefficients[2]))-1),
+(exp(as.numeric(vprot$coefficients[2]))-1)))
+colnames(vpro)=c("Bacia","Vperm","Vtemp")
+vprodbacial2[[i]]=vpro
+}
+vprodbaciap$x[!is.finite(vprodbaciap$x)]=NA
+###################################################
+###Valor da produção por bacia
+vprodbaciap=aggregate(vcultperm[,c(3)],by=list(Bacia=vcultperm$Bacia,Ano=vcultperm$Ano),sum,na.rm=T)
+vprodbaciap$x=log(vprodbaciap$x)
+vprodbaciap$x[!is.finite(vprodbaciap$x)]=NA
+vprodbaciat=aggregate(vculttemp[,c(3)],by=list(Bacia=vculttemp$Bacia,Ano=vculttemp$Ano),sum,na.rm=T)
+vprodbaciat$x=log(vprodbaciat$x)
+vprodbaciat$x[!is.finite(vprodbaciat$x)]=NA
+vprodbacia=merge(vprodbaciap,vprodbaciat,by.x=c("Bacia","Ano"),by.y=c("Bacia","Ano"))
+colnames(vprodbacia)=c("Bacia","Ano","Vperm","Vtemp")
+vprodbacial2=list()
+vprodbacial=split(vprodbacia,paste(vprodbacia$Bacia))
+for(i in 1:length(vprodbacial)){
+vprop=lm(vprodbacial[[i]]$Vperm ~ vprodbacial[[i]]$Ano,data=vprodbacial[[i]])
+vprot=lm(vprodbacial[[i]]$Vtemp ~ vprodbacial[[i]]$Ano,data=vprodbacial[[i]])
+vpro=as.data.frame(cbind(as.character(vprodbacial[[i]]$Bacia[1]),(exp(as.numeric(vprop$coefficients[2]))-1),
+(exp(as.numeric(vprot$coefficients[2]))-1)))
+colnames(vpro)=c("Bacia","Vperm","Vtemp")
+vprodbacial2[[i]]=vpro
+}
+vprodbacia=do.call(rbind.data.frame,vprodbacial2)
+View(vprodbacia)
+View(vprodbacia)

@@ -1,0 +1,512 @@
+colnames(temp)=c("Municipio","Ano","VTReal")
+lvculttemp2[[i]]=temp
+}
+vculttemp=do.call(rbind.data.frame,lvculttemp2)
+vculttemp$logreal=log(vculttemp$VTReal)
+vculttemp$logreal[!is.finite(vculttemp$logreal)]=NA
+#Padronizando data de área colhida e aplicando log
+areaculttemp=areaculttemp[areaculttemp$Ano>=1994,]
+areaculttemp$logarea=log(areaculttemp$Area.Colhida)
+areaculttemp$logarea[!is.finite(areaculttemp$logarea)]=NA
+#O painel de dados tem que necessariamente ser balanceado para que eu consiga fazer regressão espacial.
+#o que eu posso fazer é deixar apenas os municípios presentes em todos os anos da série
+vculttemp=merge(vculttemp,areaculttemp,by.x=c('Municipio','Ano'),by.y=c('Município','Ano'))
+vculttemp=merge(vculttemp,climafinalanosp, by.x=c('Municipio','Ano'),by.y=c('Codigo','Ano'),all.x=T,all.y=F)
+vculttemp=merge(vculttemp,climafinalestsp, by.x=c('Municipio','Ano'),by.y=c('Codigo','Ano'),all.x=T,all.y=F)
+lvculttemp=split(vculttemp,paste(vculttemp$Municipio))
+lvculttemp2=list()
+j=1
+for (i in 1:length(lvculttemp)){
+lvculttemp[[i]]$TesteNA=0
+lvculttemp[[i]]$TesteNA[is.na(lvculttemp[[i]]$logreal)]=1
+if(sum(lvculttemp[[i]]$TesteNA)==0){
+lvculttemp2[j]=lvculttemp[i]
+j=j+1
+}
+}
+vculttemp=do.call(rbind.data.frame,lvculttemp2)
+library(plm)
+library(splm)
+Y=cbind(vculttemp[,c(4)])
+pdata=plm.data(vculttemp[,c(1,2)], c("Municipio","Ano"))
+#Difícil explicar esses modelos. acho que a ideia de regressão em função de clusters é mais fácil
+#X=as.matrix(vculttemp[,c(6,8,11,26,40,54,68)])
+X=as.matrix(vculttemp[,c(6,8,9,10,11,12,17,19)])
+#X=as.matrix(vculttemp[,c(6,9,10)])
+#X=as.matrix(vculttemp[,c(6,9,11,17,19)])
+###Tratar os shapefiles para trabalhar apenas com São Paulo
+library(maptools)
+#Malha de municípios
+municipios=readShapeSpatial(file.choose())
+#Selecionar apenas os municípios que pertencem ao estado de SP
+spmunicipios=municipios
+spmunicipios=spmunicipios[order(spmunicipios@data$uf),]
+spmunicipios@data$Cod=1:length(municipios@data$id)
+spmunicipios=spmunicipios[c(4781:5425),]
+#Exlui Ilha Bela do litoral de São Paulo. Com nã havia conexões com o continente
+#estava dando problema na hora de criar a matrix de pesos.
+spmunicipios2014=spmunicipios[c(1:12,14:645),]
+munpanel=vculttemp[vculttemp$Ano==2014,]
+#Não vai ser só ilha bela
+#Tenho que excluir todos os municípios que não estão presentes no painel de dados
+#Atribuindo 1 a variável bin para os elementos que estão presentes em munpanel e spmunicipios2014 simultaneamente
+spmunicipios2014$bin=0
+for (i in 1:length(spmunicipios2014$codigo_ibg)){
+for (j in 1:length(munpanel$Municipio)){
+if (spmunicipios2014$codigo_ibg[[i]]==munpanel$Municipio[[j]]){
+spmunicipios2014$bin[[i]]=1
+}
+}
+}
+#Pegando em spmunicipios2014 apenas os elementos com valor de bin =1  e atribuindo novamente a spmunicipios2014
+spmunicipios2014=spmunicipios2014[spmunicipios2014$bin==1,]
+#Cria neighbors por contiguidade
+spneighbors=poly2nb(spmunicipios2014)
+coords=coordinates(spmunicipios2014)
+#Plotanto mapa de vizinhança
+plot(spneighbors,coords,col="black")
+#####Spatial weight matrix based on contiguity
+weigthmatrix=nb2listw(spneighbors)
+summary(weigthmatrix)
+plot(coords)
+summary(Y)
+View(Y)
+View(vculttemp)
+names(vculttemp)
+logarea=vculttemp[,c(1,2,4)]
+head(logarea)
+logareal=split(logarea,paste(logarea$Ano))
+head(loareal[[1]])
+head(loagareal[[1]])
+head(logareal[[1]])
+moran.test(logareal[[1]]$logreal,weigthmatrix)
+moran.plot(logareal[[1]]$logreal,weigthmatrix)
+lm.LMtests(logareal[[1]]$logreal,weigthmatrix,test=c("LMlag","LMerr"))
+moran.test(logareal[[1]]$logreal,weigthmatrix)
+View(spmunicipios2014)
+moran.test(logareal[[2]]$logreal,weigthmatrix)
+moran.test(logareal[[3]]$logreal,weigthmatrix)
+moran.test(logareal[[4]]$logreal,weigthmatrix)
+names(spmunicipios2014@data)
+ordem=spmunicipios2014@data[,c(7,9)]
+dim(length(ordem)[1]
+im(length(ordem)[1])
+dim(length(ordem)[1])
+dim(length(ordem)[2])
+ordem
+dim(ordem)[1]
+ordem$bin=1:dim(ordem)[1]
+ordem
+names(ordem)
+names(logareal[[1]])
+ordem=merge(ordem,logreal[[1]],by.x=c('codigo_ibg'),by.y=c('Municipio'))
+ordem=merge(ordem,logareal[[1]],by.x=c('codigo_ibg'),by.y=c('Municipio'))
+ordem
+ordem=ordem[order(ordem$bin),]
+ordem
+moran.test(ordem$logreal,weigthmatrix)
+moran.plot(ordem$logreal,weigthmatrix)
+moran.plot(ordem$logreal,weigthmatrix)
+ordem=spmunicipios2014@data[,c(7,9)]
+head(ordem)
+ordem$bin=1:dim(ordem)[1]
+head(ordem)
+morani=merge(ordem,logareal[[1]],by.x=c('codigo_ibg'),by.y=c('Municipio'))
+morani=morani[order(morani$bin),]
+moran.test(morani$logreal,weigthmatrix)
+testemoran=moran.test(morani$logreal,weigthmatrix)
+testemoran$statistic
+testemoran$estimate
+testemoran$method
+testemoran$data.name
+testemoran$statistic
+a=as.data.frame(testemoran$estimate)
+a
+a=as.data.frame(cbind((testemoran$estimate))
+a=as.data.frame(cbind((testemoran$estimate)))
+a
+a=as.data.frame(rbind((testemoran$estimate)))
+a
+View(a)
+testemoran$p.value
+testemoran
+pvalue=as.data.frame(testemoran$p.value)
+pvalue
+testemoran=cbind(estimates,pvalue,logareal[[1]]$Ano)
+estimates=as.data.frame(rbind((testemoran$estimate)))
+pvalue=as.data.frame(testemoran$p.value)
+testemoran=cbind(estimates,pvalue,logareal[[1]]$Ano)
+testemoran
+testemoran=cbind(estimates,pvalue,logareal[[1]]$Ano[1])
+testemoran
+View(testemoran)
+colnames(testemoran)[4,5]=c("Pvalue","Ano")
+colnames(testemoran)[4]=c("Pvalue")
+names(testemoran)
+colnames(testemoran)[5]=c("Ano")
+names(testemoran)
+testemoran=testemoran[,c(5,1:4)]
+names(testemoran)
+logarea=vculttemp[,c(1,2,4)]
+logareal=split(logarea,paste(logarea$Ano))
+ordem=spmunicipios2014@data[,c(7,9)]
+ordem$bin=1:dim(ordem)[1]
+head(logarea)
+head(ordem)
+length(logareal)
+for (i in 1:length(logareal)){
+morani=merge(ordem,logareal[[i]],by.x=c('codigo_ibg'),by.y=c('Municipio'))
+morani=morani[order(morani$bin),]
+testemoran=moran.test(morani$logreal,weigthmatrix)
+#moran.plot(morani$logreal,weigthmatrix)
+estimates=as.data.frame(rbind((testemoran$estimate)))
+pvalue=as.data.frame(testemoran$p.value)
+testemoran=cbind(estimates,pvalue,logareal[[i]]$Ano[1])
+colnames(testemoran)[4]=c("Pvalue")
+colnames(testemoran)[5]=c("Ano")
+testemoran=testemoran[,c(5,1:4)]
+panelmoran[[i]]=testemoran
+}
+panelmoran=list()
+for (i in 1:length(logareal)){
+morani=merge(ordem,logareal[[i]],by.x=c('codigo_ibg'),by.y=c('Municipio'))
+morani=morani[order(morani$bin),]
+testemoran=moran.test(morani$logreal,weigthmatrix)
+#moran.plot(morani$logreal,weigthmatrix)
+estimates=as.data.frame(rbind((testemoran$estimate)))
+pvalue=as.data.frame(testemoran$p.value)
+testemoran=cbind(estimates,pvalue,logareal[[i]]$Ano[1])
+colnames(testemoran)[4]=c("Pvalue")
+colnames(testemoran)[5]=c("Ano")
+testemoran=testemoran[,c(5,1:4)]
+panelmoran[[i]]=testemoran
+}
+a=do.call(rbind.data.frame(panelmoran))
+a=do.call(rbind.data.frame,panelmoran)
+View(a)
+mean(a$`Moran I statistic`)
+moranI=do.call(rbind.data.frame,panelmoran)
+View(moranI)
+library(Hmisc)
+latex(moranI,rowname = NULL)
+round(moranI,2)
+round(moranI,4)
+setwd("/home/bmiyamoto/Documentos/Pesquisa/Artigo VBPSP")
+latex(moranI,rowname = NULL)
+round(moranI,4)
+setwd("/home/bmiyamoto/Documentos/Pesquisa/Artigo VBPSP")
+latex(moranI,rowname = NULL)
+round(moranI,4)
+moranI=round(moranI,4)
+setwd("/home/bmiyamoto/Documentos/Pesquisa/Artigo VBPSP")
+latex(moranI,rowname = NULL)
+latex(moranI,rowname = NULL)
+rm(list=ls())
+#AREAS MÍNIMAS COMPARÁVEIS
+#Preciso converter a tabela dadosclimaanobr que está por munícípios para áreas mínimas comparáveis
+#só assim poderei comparar todos os municípios ao longo do tempo
+#Carrega tabela de áreas mínimas comparáveis
+AMC=read.csv("/home/bmiyamoto/Documentos/Pesquisa/Artigo congresso de econometria espacial/Area mínima comparável/AMCs.csv")
+AMC=AMC[,c(2,9)]
+#As AMCs são baseadas em uma malha antiga do IBGE. Os dados de produção e climáticos
+#são para os 5565 municípios da base de 2010. Quer dizer que ao compatibiliar AMCs com municípiios
+# vai ter  município sem código de AMCs porque eles podem ter sido criados depois
+# da malha de AMCs que segundo o gori foi criada no começo dos anos 2000
+#Preciso ver qual município se emancipou apos a criação das AMCs e alterar o código manualmente
+# para enviar espaços em branco nos mapas e ausencia de valores nos modelos
+mun5565=read.csv("/home/bmiyamoto/Documentos/Pesquisa/Artigo congresso de econometria espacial/Area mínima comparável/5565 municipios.csv",header=T)
+mun5565=mun5565[,c(1,2,5)]
+emancipa=merge(AMC,mun5565,by.x=c('UFMUNDV'),by.y=c('Codigo'),all.x=T,all.y=T)
+emancipa$NEW_CODE_1970_1997[680]=emancipa$NEW_CODE_1970_1997[826]
+emancipa$NEW_CODE_1970_1997[4917]=emancipa$NEW_CODE_1970_1997[4756]
+emancipa$NEW_CODE_1970_1997[4604]=emancipa$NEW_CODE_1970_1997[4633]
+emancipa$NEW_CODE_1970_1997[803]=emancipa$NEW_CODE_1970_1997[882]
+emancipa$NEW_CODE_1970_1997[4611]=emancipa$NEW_CODE_1970_1997[4692]
+emancipa$NEW_CODE_1970_1997[4626]=emancipa$NEW_CODE_1970_1997[4914]
+emancipa$NEW_CODE_1970_1997[1867]=emancipa$NEW_CODE_1970_1997[2201]
+emancipa$NEW_CODE_1970_1997[4649]=emancipa$NEW_CODE_1970_1997[4805]
+emancipa$NEW_CODE_1970_1997[4650]=emancipa$NEW_CODE_1970_1997[4728]
+emancipa$NEW_CODE_1970_1997[5195]=emancipa$NEW_CODE_1970_1997[5182]
+emancipa$NEW_CODE_1970_1997[4658]=emancipa$NEW_CODE_1970_1997[4805]
+emancipa$NEW_CODE_1970_1997[5372]=emancipa$NEW_CODE_1970_1997[5334]
+emancipa$NEW_CODE_1970_1997[820]=emancipa$NEW_CODE_1970_1997[673]
+emancipa$NEW_CODE_1970_1997[1142]=emancipa$NEW_CODE_1970_1997[1237]
+emancipa$NEW_CODE_1970_1997[4684]=emancipa$NEW_CODE_1970_1997[4835]
+emancipa$NEW_CODE_1970_1997[4685]=emancipa$NEW_CODE_1970_1997[4834]
+emancipa$NEW_CODE_1970_1997[4687]=emancipa$NEW_CODE_1970_1997[4975]
+emancipa$NEW_CODE_1970_1997[5210]=emancipa$NEW_CODE_1970_1997[5191]
+emancipa$NEW_CODE_1970_1997[5213]=emancipa$NEW_CODE_1970_1997[5271]
+emancipa$NEW_CODE_1970_1997[4718]=emancipa$NEW_CODE_1970_1997[4878]
+emancipa$NEW_CODE_1970_1997[4722]=emancipa$NEW_CODE_1970_1997[4778]
+emancipa$NEW_CODE_1970_1997[4729]=emancipa$NEW_CODE_1970_1997[4674]
+emancipa$NEW_CODE_1970_1997[1690]=emancipa$NEW_CODE_1970_1997[1741]
+emancipa$NEW_CODE_1970_1997[5216]=emancipa$NEW_CODE_1970_1997[5197]
+emancipa$NEW_CODE_1970_1997[5134]=emancipa$NEW_CODE_1970_1997[5118]
+emancipa$NEW_CODE_1970_1997[4775]=emancipa$NEW_CODE_1970_1997[4835]
+emancipa$NEW_CODE_1970_1997[5408]=emancipa$NEW_CODE_1970_1997[5544]
+emancipa$NEW_CODE_1970_1997[3123]=emancipa$NEW_CODE_1970_1997[3115]
+emancipa$NEW_CODE_1970_1997[2061]=emancipa$NEW_CODE_1970_1997[1865]
+emancipa$NEW_CODE_1970_1997[5430]=emancipa$NEW_CODE_1970_1997[5380]
+emancipa$NEW_CODE_1970_1997[5228]=emancipa$NEW_CODE_1970_1997[5306]
+emancipa$NEW_CODE_1970_1997[5229]=emancipa$NEW_CODE_1970_1997[5306]
+emancipa$NEW_CODE_1970_1997[3217]=emancipa$NEW_CODE_1970_1997[3224]
+emancipa$NEW_CODE_1970_1997[4818]=emancipa$NEW_CODE_1970_1997[5054]
+emancipa$NEW_CODE_1970_1997[4823]=emancipa$NEW_CODE_1970_1997[4908]
+emancipa$NEW_CODE_1970_1997[4831]=emancipa$NEW_CODE_1970_1997[5038]
+emancipa$NEW_CODE_1970_1997[5451]=emancipa$NEW_CODE_1970_1997[5436]
+emancipa$NEW_CODE_1970_1997[4855]=emancipa$NEW_CODE_1970_1997[4667]
+emancipa$NEW_CODE_1970_1997[5250]=emancipa$NEW_CODE_1970_1997[5179]
+emancipa$NEW_CODE_1970_1997[5252]=emancipa$NEW_CODE_1970_1997[5230]
+emancipa$NEW_CODE_1970_1997[5264]=emancipa$NEW_CODE_1970_1997[5299]
+emancipa$NEW_CODE_1970_1997[4893]=emancipa$NEW_CODE_1970_1997[4717]
+emancipa$NEW_CODE_1970_1997[4909]=emancipa$NEW_CODE_1970_1997[4751]
+emancipa$NEW_CODE_1970_1997[4911]=emancipa$NEW_CODE_1970_1997[4753]
+emancipa$NEW_CODE_1970_1997[4939]=emancipa$NEW_CODE_1970_1997[4751]
+emancipa$NEW_CODE_1970_1997[4951]=emancipa$NEW_CODE_1970_1997[5003]
+emancipa$NEW_CODE_1970_1997[5290]=emancipa$NEW_CODE_1970_1997[5191]
+emancipa$NEW_CODE_1970_1997[4964]=emancipa$NEW_CODE_1970_1997[5041]
+emancipa$NEW_CODE_1970_1997[5293]=emancipa$NEW_CODE_1970_1997[5288]
+emancipa$NEW_CODE_1970_1997[4969]=emancipa$NEW_CODE_1970_1997[4988]
+emancipa$NEW_CODE_1970_1997[4999]=emancipa$NEW_CODE_1970_1997[4961]
+emancipa$NEW_CODE_1970_1997[5295]=emancipa$NEW_CODE_1970_1997[5255]
+emancipa$NEW_CODE_1970_1997[5297]=emancipa$NEW_CODE_1970_1997[5261]
+emancipa$NEW_CODE_1970_1997[5011]=emancipa$NEW_CODE_1970_1997[4898]
+emancipa$NEW_CODE_1970_1997[5301]=emancipa$NEW_CODE_1970_1997[5182]
+emancipa$NEW_CODE_1970_1997[5051]=emancipa$NEW_CODE_1970_1997[5089]
+emancipa$NEW_CODE_1970_1997[5311]=emancipa$NEW_CODE_1970_1997[5271]
+emancipa$NEW_CODE_1970_1997[5098]=emancipa$NEW_CODE_1970_1997[5050]
+#Aqui só salvei por medo de perder trabalho caso a númeração das linhas das tabelas mude
+#da próxima vez que eu reiniciar o computador
+#setwd("/home/bmiyamoto/Documentos/Pesquisa/Artigo congresso de econometria espacial/Area mínima comparável")
+#write.csv(emancipa,file="emancipa",row.names=F)
+AMC=emancipa[,c(1,2)]
+#milho
+#Converter base de municípios para AMCs
+#O argumento na.strings=c("","NA") faz com que todos os espaços em branco da tabela (que tenham o caracter "-" ) sejam preenchidos por missings
+milho = read.csv("/home/bmiyamoto/Documentos/Pesquisa/Artigo congresso de econometria espacial/milho4.csv", header=TRUE, na.strings = c("-","NA"))
+milho=merge(milho,AMC,by.x=c('Codigo'),by.y=c('UFMUNDV'),all.x=T,all.y=T)
+milho=aggregate(milho[,c(3)],by=list(AMC=milho$NEW_CODE_1970_1997,Ano=milho$Ano),mean,na.rm=T)
+milho$logmilho=log(milho$x)
+#Faz com que os valores infinitos da coluna logmilho (Inf-Inf) sejam substituídos por NA
+milho$logmilho[!is.finite(milho$logmilho)]=NA
+colnames(milho)[3]="Produtividade"
+#Feijão
+feijao= read.csv("/home/bmiyamoto/Documentos/Pesquisa/Artigo congresso de econometria espacial/feijao.csv", header=TRUE, na.strings = c("-","NA"))
+feijao=merge(feijao,AMC,by.x=c('Municipio'),by.y=c('UFMUNDV'),all.x=T,all.y=T)
+feijao=aggregate(feijao[,c(3)],by=list(AMC=feijao$NEW_CODE_1970_1997,Ano=feijao$Ano),mean,na.rm=T)
+feijao$logfeijao=log(feijao$x)
+feijao$logfeijao[!is.finite(feijao$logfeijao)]=NA
+colnames(feijao)[3]="Produtividade"
+#Mandioca
+mandioca=read.csv("/home/bmiyamoto/Documentos/Pesquisa/Artigo congresso de econometria espacial/mandioca.csv", header=TRUE, na.strings = c("-","NA"))
+mandioca=merge(mandioca,AMC, by.x=c('Município'),by.y=c('UFMUNDV'),all.x=T,all.y=T)
+mandioca=aggregate(mandioca[,c(3)],by=list(AMC=mandioca$NEW_CODE_1970_1997,Ano=mandioca$Ano),mean,na.rm=T)
+mandioca$logmandioca=log(mandioca$x)
+mandioca$logmandioca[!is.finite(mandioca$logmandioca)]=NA
+colnames(mandioca)[3]="Produtividade"
+#######Produtividade do leite, produção do leite e vacas ordenhadas
+#Vacas ordenhadas
+vacasordenhadas=read.csv("/home/bmiyamoto/Documentos/Pesquisa/Artigo congresso de econometria espacial/vacas ordenhadas.csv",header=T,na.strings = c("-","NA"))
+vacasordenhadas=merge(vacasordenhadas,AMC,by.x=c('Municipio'),by.y=c('UFMUNDV'),all.x=T,all.y=T)
+vacasordenhadas=aggregate(vacasordenhadas[,c(3)],by=list(AMC=vacasordenhadas$NEW_CODE_1970_1997,Ano=vacasordenhadas$Ano),sum,na.rm=T)
+colnames(vacasordenhadas)[3]="Numero de vacas"
+# Produção de leite
+leite = read.csv("/home/bmiyamoto/Documentos/Pesquisa/Artigo congresso de econometria espacial/leite.csv", header=TRUE, na.strings = c("-","NA"))
+leite=merge(leite,AMC,by.x=c('Codigo'),by.y=c('UFMUNDV'),all.x=T,all.y=T)
+leite=aggregate(leite[,c(5)],by=list(AMC=leite$NEW_CODE_1970_1997,Ano=leite$Ano),sum,na.rm=T)
+colnames(leite)[3]="Producao de leite"
+#Log, Produtividade,produção e número de vacas de leite
+leite=merge(leite,vacasordenhadas,by.x=c('AMC','Ano'),by.y=c('AMC','Ano'),all.x=T,all.y=T)
+leite$produtividade=leite$`Producao de leite`/leite$`Numero de vacas`
+leite$logprodutividade=log(leite$produtividade)
+leite$logproducao=log(leite$`Producao de leite`)
+leite$logvacas=log(leite$`Numero de vacas`)
+leite$logproducao[!is.finite(leite$logproducao)]=NA
+leite$logprodutividade[!is.finite(leite$logprodutividade)]=NA
+leite$logvacas[!is.finite(leite$logvacas)]=NA
+#Carrega dados climáticos
+load("/home/bmiyamoto/Documentos/Pesquisa/Artigo congresso de econometria espacial/dadosclimaanobr.RData")
+dadosclimaanobr=merge(dadosclimaanobr,AMC, by.x=c('Codigo'),by.y=('UFMUNDV'),all.x=T,all.y=T)
+#Agora pego apenas as variáveis que me interessa da tabela dadosclimaanobr
+clima=dadosclimaanobr[,c(1,4:8,10,12,17,19,21)]
+colnames(clima)=c("Codigo","Ano","Tmax","Tmin","Tme","Umidade","Preciptot","semchuva","maisde10mm","diaseco4","AMC")
+clima=aggregate(clima[,c(3:10)],by=list(AMC=clima$AMC,Ano=clima$Ano),mean,na.rm=T)
+#Tenho que selecionar os dados da tabela clima superiores a 1990, que é quando
+#começam as três séries de produção apesar. Apesar do leite começar  em 74,
+# é bom padronizar o ano de início dos clusters
+lclima=split(clima,paste(clima$Ano))
+clima=do.call(rbind.data.frame,lclima[30:54])
+##################Clusterizar
+#Agora eu crio um cluster com base em todo o período. Mas só posso deixar na tabela clusteriza
+#as variáveis climáticas
+clusteriza=clima[,c(3:10)]
+#O cluster criado exploca 90,7% da variabilidade
+cluster=kmeans(clusteriza,5)
+#Agora a tabela clima recebe o valor dos clusters
+clima$clusters=cluster$cluster
+#Criar binárias para clusters
+#acho que além de salvar os valores dos clusters eu tenho que criar quatro binárias, mantendo o
+#o primeiro cluster como referência. Depois faço regresssão em função das binárias.
+#Eu criei cinco binárias mas na verdade só preciso de 4 (C2 a C5). C1 é só para questões de
+#contabilização
+clima$C1=0
+clima$C2=0
+clima$C3=0
+clima$C4=0
+clima$C5=0
+clima$C1[(clima$clusters==1)]=1
+clima$C2[(clima$clusters==2)]=1
+clima$C3[(clima$clusters==3)]=1
+clima$C4[(clima$clusters==4)]=1
+clima$C5[(clima$clusters==5)]=1
+#Salvar os centros dos clusters e a variabilidade explicada
+#setwd("/home/bmiyamoto/Documentos/Pesquisa/Artigo congresso de econometria espacial/Resultados")
+#write.csv(cluster$centers,file="Cluster centers",row.names=T)
+####
+#mas também já posso colocar a tabela anterior em formato latex já que ela vai direto para o texto
+centers=as.data.frame(cluster$centers)
+#Arredondar valores para 0 casa decimal
+centers1=round(centers[,c(1:3)],1)
+centers2=round(centers[,c(4:8)],0)
+centers=cbind(centers1,centers2)
+centers=centers[order(centers$Preciptot),]
+cnames=c("C1","C2","C3","C4","C5")
+centers$Cluster=cbind(cnames)
+centers=centers[,c(9,1:8)]
+colnames(centers)=c("Cluster","V1","V2","V3","V4","V5","V6","V8","V9")
+#library(Hmisc)
+#latex(centers,rowname = NULL)
+#Preciso recodificar os clusters da mesma forma que fiz com essa tabela.
+#c3=1, c1=2, c5=3, c4=4, c2=5
+#Preciso montar uma tabela com a quantidade de municípios nos clusters em cada ano
+muncluster=aggregate(clima[c(12:16)],by=list(clima$Ano),sum,na.rm=T)
+#write.csv(muncluster,file="AMC por cluster",row.names=F)
+plot(C1 ~ Group.1,data=muncluster)
+c1=lm(formula=C1 ~ Group.1,data=muncluster)
+abline(c1)
+plot(C2 ~ Group.1,data=muncluster)
+c2=lm(formula=C2 ~ Group.1,data=muncluster)
+abline(c2)
+plot(C3 ~ Group.1,data=muncluster)
+c3=lm(formula=C3 ~ Group.1,data=muncluster)
+abline(c3)
+plot(C4 ~ Group.1,data=muncluster)
+c4=lm(formula=C4 ~ Group.1,data=muncluster)
+abline(c4)
+plot(C5 ~ Group.1,data=muncluster)
+c5=lm(formula=C5 ~ Group.1,data=muncluster)
+abline(c5)
+#mundiff=as.matrix(muncluster)
+#munclusterdiff=diff(mundiff,lag=1)
+#c1=lm(formula=DC1 ~ DAno,data=munclusterdiff)
+#c2=lm(formula=DC2 ~ DAno,data=munclusterdiff)
+#c3=lm(formula=DC3 ~ DAno,data=munclusterdiff)
+#c4=lm(formula=DC4 ~ DAno,data=munclusterdiff)
+#c5=lm(formula=DC5 ~ DAno,data=munclusterdiff)
+######Mapas
+#Ideias
+# Gerar um mapa por municipios, com a cor de qual cluter o municipio é mais
+# classificado.
+#gerar um mapa só levando em conta o cluster 3. Ai eu crio faixas (cinco ou seis),
+# com o número de vezes que o município foi classificado no cluster, indo do amarelo
+# ao mais vermelho. De certa forma vou ter regiões de risco de seca
+library(maptools)
+#Malha de municípios
+municipios=readShapeSpatial(file.choose())
+#Para adicionar contornos no mapa final preciso adicionar o shape file dos estados
+estados=readShapeSpatial(file.choose())
+#Fazer mapa com os cluster que aparecem mais vezes em cada municipio ao longo do tempo
+munclustermap=aggregate(clima[,c(12:16)],by=list(AMC=clima$AMC),sum,na.rm=T)
+l2= split(munclustermap, paste(munclustermap$AMC))
+for (i in 1:length(l2)){
+C1=l2[[i]]$C1
+C2=l2[[i]]$C2
+C3=l2[[i]]$C3
+C4=l2[[i]]$C4
+C5=l2[[i]]$C5
+maximo=max(C1,C2,C3,C4,C5)
+if (maximo==C1){
+l2[[i]]$cluster=1
+}
+if (maximo==C3){
+l2[[i]]$cluster=3
+}
+if (maximo==C4){
+l2[[i]]$cluster=4
+}
+if (maximo==C5){
+l2[[i]]$cluster=5
+}
+if (maximo==C2){
+l2[[i]]$cluster=2
+}
+}
+munclustermap=do.call(rbind.data.frame,l2)
+#Agora preciso converter AMCs em municípios novamente e atribuir o código do cluster mais
+#frequente aos municípios
+munamcs=merge(munclustermap,AMC,by.x=c('AMC'),by.y=c('NEW_CODE_1970_1997'))
+municipiosc=municipios
+dados=municipiosc@data
+dados$ordem=0:(dim(dados)[1]-1)
+dadosc=munamcs[,c(8,7)]
+dadosc$cor[(dadosc$cluster==4)]=as.character("chartreuse4")
+dadosc$cor[(dadosc$cluster==3)]=as.character("red2")
+dadosc$cor[(dadosc$cluster==1)]=as.character("darkorange")
+dadosc$cor[(dadosc$cluster==5)]=as.character("yellow2")
+dadosc$cor[(dadosc$cluster==2)]=as.character("darkgreen")
+dadosfinais=merge(dados,dadosc,by.x=c("codigo_ibg"),by.y=("UFMUNDV"),all.x=T)
+dadosfinais=dadosfinais[,c(2:7,1,8:10)]
+dadosfinais=dadosfinais[order(dadosfinais$ordem),]
+dadosfinais=dadosfinais[,c(1:7,9,10)]
+municipiosc@data=dadosfinais
+plot(municipiosc, border=F,lwd=.1, axes=F,las=1,col=municipiosc@data$cor)
+plot(estados,add=TRUE,lwd=0.5)
+#Deveria ter feito isso lá em cima, mas agora vou recodificar a tabela clima
+#de forma que fiz la em cima com C1 sendo a mais seca e C5 a mais umida.
+#Depois vou deixar C3 como categoria de referência, ou seja, não vou atribuir
+#Binária para ela
+clima$C1=0
+clima$C2=0
+clima$C3=0
+clima$C4=0
+clima$C5=0
+clima$C2[(clima$clusters==1)]=1
+clima$C5[(clima$clusters==2)]=1
+clima$C1[(clima$clusters==3)]=1
+clima$C4[(clima$clusters==4)]=1
+clima$C3[(clima$clusters==5)]=1
+library(plm)
+#Os melhores resultados estão vindo com os modelos de primeira diferença
+#Painel mandioca
+mandioca=merge(mandioca,clima,by.x=c('AMC','Ano'),by.y=c('AMC','Ano'))
+#Minha variável dependente é logmilho
+Ymc=cbind(mandioca[,c(4)])
+#Minhas variáveis dependentes iniciais
+Xmc=as.matrix(mandioca[,c(15:18)])
+#Agora define-se o painel, a unidade de corte transversal e o tempo
+pdata=plm.data(mandioca[,c(1,2)], c("AMC","Ano"))
+#Rodar modelo de dados empilhados
+mandiocapooled=plm(Ymc ~ Xmc,data=pdata, model="pooling")
+summary(mandiocapooled)
+#Rodar modelo de efeitos fixos ou within
+mandiocafix=plm(Ymc ~ Xmc, data=pdata, model="within")
+summary(mandiocafix)
+#Rodar modelo de primeira diferen
+#Dos três modelos: produção produtividade, e número de vacas, gori sugeriu que eu usasse o que deu melhores resultados
+#nesse caso usarei o modelo de produção. Ele sugeriu que nesse caso eu controle produção pelos clusters e também pelo número
+#de vacas. Vamos ver ser funciona. Uma variável de cluster continua dando não signficativa mesmo controlando por número de vacas
+# Eu acho melhor plotar os resultados dos três modelos. Há queda de produtividade do leite na seca só que a queda na produção
+# é maior. Quando olha para o modelo do número de vacas dá para explicar que a queda na produção é maior do que o número de vacas
+# porque os produtores  tendem a vender vacas em momentos de seca e manter os restante produzindo. Tem que ver se dá
+#para explicar isso dessa forma.
+#Painel produção leite
+leiteqtd=merge(leite,clima,by.x=c('AMC','Ano'),by.y=c('AMC','Ano'))
+Ylqtd=cbind(leiteqtd[,c(7)])
+Xlqtd=as.matrix(leiteqtd[,c(19:22)])
+pdataqtd=plm.data(leiteqtd[,c(1,2)], c("AMC","Ano"))
+#Pooled
+leiteqtdpooled=plm(Ylqtd ~ Xlqtd,data=pdataqtd, model="pooling")
+summary(leiteqtdpooled)
+#Rodar modelo de efeitos fixos ou within
+leiteqtdfix=plm(Ylqtd ~ Xlqtd, data=pdataqtd, model="within")
+summary(leiteqtdfix)
